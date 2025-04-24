@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Upload Gallery</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        .gallery img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 0.5rem;
+        }
+        .gallery > div {
+            @apply bg-white p-4 rounded shadow;
+        }
+    </style>
+</head>
+<body class="p-6 bg-gray-100">
+    <h1 class="text-4xl font-bold mb-4">Image Upload Gallery</h1>
+    <p class="text-lg mb-4">Below is a collection of images that have been uploaded. Click on any image to view it in full size.</p>
+    <div class="gallery">
+        {% for entry in data %}
+            {% for img in entry.images %}
+                <div>
+                    <img src="/uploads/{{ img }}" alt="{{ img }}">
+                </div>
+            {% endfor %}
+        {% endfor %}
+    </div>
+    <footer class="mt-12 text-center text-gray-600">
+        <p>&copy; 2023 Image Upload Gallery. All rights reserved.</p>
+    </footer>
+</body>
+</html>
+
