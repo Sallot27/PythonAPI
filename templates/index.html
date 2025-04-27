@@ -5,7 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Motor Insurance Documentation | Image Gallery</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
     <style>
       .gallery-container {
         display: grid;
@@ -13,7 +16,7 @@
         gap: 1.5rem;
       }
       .gallery-card {
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        transition: all 0.3s ease;
         overflow: hidden;
       }
       .gallery-card:hover {
@@ -154,21 +157,26 @@
                 <!-- Images Gallery -->
                 <div class="p-6">
                     <div class="gallery-container">
-                        {% for img, label in entry.images %}
+                        {% for img in entry.images %}
                         <div
                           class="gallery-card rounded-lg overflow-hidden border border-gray-200"
                           role="group"
-                          aria-label="Image {{ label }}"
+                          aria-label="Image {{ loop.index }}: {% if loop.index == 1 %}Front View{% elif loop.index == 2 %}Back View{% elif loop.index == 3 %}Right Side{% elif loop.index == 4 %}Left Side{% elif loop.index == 5 %}Engine{% elif loop.index == 6 %}Chassis{% endif %}"
                         >
                             <div class="image-container">
                                 <img
                                   src="/uploads/{{ img }}"
-                                  alt="Vehicle image {{ label }}"
+                                  alt="Vehicle image {{ loop.index }}"
                                   class="gallery-img cursor-pointer"
                                   loading="lazy"
                                 />
                                 <div class="image-label">
-                                    {{ label }}
+                                    {% if loop.index == 1 %}Front View{% endif %}
+                                    {% if loop.index == 2 %}Back View{% endif %}
+                                    {% if loop.index == 3 %}Right Side{% endif %}
+                                    {% if loop.index == 4 %}Left Side{% endif %}
+                                    {% if loop.index == 5 %}Engine{% endif %}
+                                    {% if loop.index == 6 %}Chassis{% endif %}
                                 </div>
                                 <div class="watermark">
                                     {{ entry.ID }} | {{ entry.date }}
@@ -355,5 +363,3 @@
       });
     </script>
 </body>
-</html>
-
