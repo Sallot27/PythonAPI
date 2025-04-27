@@ -24,12 +24,14 @@
 </head>
 <body class="p-6 bg-gray-100">
     <h1 class="text-4xl font-bold mb-4">Image Upload Gallery</h1>
-    <p class="text-lg mb-4">Below is a collection of images that have been uploaded. </p>\
+    <p class="text-lg mb-4">Below is a collection of images that have been uploaded.</p>
     <li> <h2 class="text-2xl font-bold mb-2">{{ entry.ID }}</h2></li>
        <li> <h3 class="text-lg mb-4">Ref: {{ entry.Ref }}</h3></li>
     <div class="gallery">
         {% for entry in data %}
             <div class="p-4 bg-white rounded shadow">
+                <h2 class="text-2xl font-bold mb-2">{{ entry.ID }}</h2>
+                <p class="text-lg mb-4">Ref: {{ entry.Ref }}</p>
                 {% for img in entry.images %}
                     <div class="mb-4">
                         <img src="/uploads/{{ img }}" alt="{{ img }}">
