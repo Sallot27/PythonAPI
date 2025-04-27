@@ -1,71 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Motor Insurance Documentation | Image Gallery</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
     <style>
-        .gallery-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 1.5rem;
-        }
-        .gallery-card {
-            transition: all 0.3s ease;
-            overflow: hidden;
-        }
-        .gallery-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-        }
-        .gallery-img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            transition: transform 0.3s ease;
-        }
-        .gallery-img:hover {
-            transform: scale(1.03);
-        }
-        .image-label {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 0.5rem;
-            font-size: 0.9rem;
-            text-align: center;
-        }
-        .image-container {
-            position: relative;
-        }
-        .watermark {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 0.8rem;
-            background: rgba(0, 0, 0, 0.5);
-            padding: 2px 5px;
-            border-radius: 3px;
-        }
+      .gallery-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.5rem;
+      }
+      .gallery-card {
+        transition: all 0.3s ease;
+        overflow: hidden;
+      }
+      .gallery-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+      }
+      .gallery-img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+      }
+      .gallery-img:hover {
+        transform: scale(1.03);
+      }
+      .image-label {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 0.5rem;
+        font-size: 0.9rem;
+        text-align: center;
+      }
+      .image-container {
+        position: relative;
+      }
+      .watermark {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.8rem;
+        background: rgba(0, 0, 0, 0.5);
+        padding: 2px 5px;
+        border-radius: 3px;
+      }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
     <!-- Header -->
-    <header class="bg-blue-600 text-white shadow-lg">
+    <header class="bg-blue-600 text-white shadow-lg" role="banner">
         <div class="container mx-auto px-6 py-8">
             <div class="flex justify-between items-center">
                 <div>
                     <h1 class="text-3xl font-bold">Motor Insurance Documentation</h1>
                     <p class="mt-2">Vehicle inspection image gallery</p>
                 </div>
-                <div class="flex items-center space-x-4">
-                    <span class="bg-blue-500 px-3 py-1 rounded-full text-sm font-medium">
+                <div class="flex items-center space-x-4" aria-live="polite" aria-atomic="true">
+                    <span class="bg-blue-500 px-3 py-1 rounded-full text-sm font-medium" id="recordCount">
                         <i class="fas fa-images mr-1"></i> {{ data|length }} Records
                     </span>
                 </div>
@@ -74,15 +77,21 @@
     </header>
 
     <!-- Main Content -->
-    <main class="container mx-auto px-6 py-8">
+    <main class="container mx-auto px-6 py-8" role="main">
         <!-- Search and Filters -->
-        <div class="mb-8 bg-white rounded-lg shadow p-6">
+        <section aria-label="Search and filter records" class="mb-8 bg-white rounded-lg shadow p-6">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div class="w-full md:w-1/2">
                     <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Search Records</label>
                     <div class="relative">
-                        <input type="text" id="search" placeholder="Search by ID or Reference..." 
-                               class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                        <input
+                          type="text"
+                          id="search"
+                          placeholder="Search by ID or Reference..."
+                          class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                          aria-describedby="searchHelp"
+                          aria-label="Search records by ID or Reference"
+                        />
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <i class="fas fa-search text-gray-400"></i>
                         </div>
@@ -91,52 +100,76 @@
                 <div class="w-full md:w-1/2">
                     <label for="filter" class="block text-sm font-medium text-gray-700 mb-1">Filter by Date</label>
                     <div class="relative">
-                        <input type="date" id="filter" 
-                               class="w-full pl-4 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                        <input
+                          type="date"
+                          id="filter"
+                          class="w-full pl-4 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                          aria-label="Filter records by date"
+                        />
                         <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                             <i class="fas fa-calendar text-gray-400"></i>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
         <!-- Records Section -->
-        <div class="mb-6">
+        <section aria-label="Insurance records" class="mb-6">
             <h2 class="text-2xl font-bold text-gray-800 mb-4">Insurance Records</h2>
-            
+
             {% for entry in data %}
-            <div class="bg-white rounded-xl shadow-md overflow-hidden mb-8">
+            <article
+              class="bg-white rounded-xl shadow-md overflow-hidden mb-8 record"
+              data-id="{{ entry.ID | lower }}"
+              data-ref="{{ entry.Ref | lower }}"
+              data-date="{{ entry.date }}"
+              aria-label="Insurance record ID {{ entry.ID }}"
+            >
                 <!-- Record Header -->
-                <div class="bg-gray-50 px-6 py-4 border-b">
+                <header class="bg-gray-50 px-6 py-4 border-b">
                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                         <div>
                             <h3 class="text-lg font-semibold text-gray-800">
-                                <i class="fas fa-id-card text-blue-500 mr-2"></i> ID: {{ entry.ID }}
+                                <i class="fas fa-id-card text-blue-500 mr-2" aria-hidden="true"></i> ID: {{ entry.ID }}
                             </h3>
                             <p class="text-gray-600 mt-1">
-                                <i class="fas fa-hashtag text-blue-500 mr-2"></i> Ref: {{ entry.Ref }}
+                                <i class="fas fa-hashtag text-blue-500 mr-2" aria-hidden="true"></i> Ref: {{ entry.Ref }}
                             </p>
                         </div>
                         <div class="mt-2 sm:mt-0">
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                                <i class="fas fa-images mr-1"></i> {{ entry.images|length }} Images
+                            <span
+                              class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800"
+                              aria-label="{{ entry.images|length }} images"
+                            >
+                                <i class="fas fa-images mr-1" aria-hidden="true"></i> {{ entry.images|length }} Images
                             </span>
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 ml-2">
-                                <i class="fas fa-calendar-day mr-1"></i> {{ entry.date }}
+                            <span
+                              class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 ml-2"
+                              aria-label="Date {{ entry.date }}"
+                            >
+                                <i class="fas fa-calendar-day mr-1" aria-hidden="true"></i> {{ entry.date }}
                             </span>
                         </div>
                     </div>
-                </div>
-                
+                </header>
+
                 <!-- Images Gallery -->
                 <div class="p-6">
                     <div class="gallery-container">
                         {% for img in entry.images %}
-                        <div class="gallery-card rounded-lg overflow-hidden border border-gray-200">
+                        <div
+                          class="gallery-card rounded-lg overflow-hidden border border-gray-200"
+                          role="group"
+                          aria-label="Image {{ loop.index }}: {% if loop.index == 1 %}Front View{% elif loop.index == 2 %}Back View{% elif loop.index == 3 %}Right Side{% elif loop.index == 4 %}Left Side{% elif loop.index == 5 %}Engine{% elif loop.index == 6 %}Chassis{% endif %}"
+                        >
                             <div class="image-container">
-                                <img src="/uploads/{{ img }}" alt="Vehicle image {{ loop.index }}" 
-                                     class="gallery-img cursor-pointer">
+                                <img
+                                  src="/uploads/{{ img }}"
+                                  alt="Vehicle image {{ loop.index }}"
+                                  class="gallery-img cursor-pointer"
+                                  loading="lazy"
+                                />
                                 <div class="image-label">
                                     {% if loop.index == 1 %}Front View{% endif %}
                                     {% if loop.index == 2 %}Back View{% endif %}
@@ -153,23 +186,31 @@
                         {% endfor %}
                     </div>
                 </div>
-                
+
                 <!-- Actions -->
-                <div class="bg-gray-50 px-6 py-3 border-t flex justify-end space-x-3">
-                    <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center">
-                        <i class="fas fa-download mr-2"></i> Download All
+                <footer class="bg-gray-50 px-6 py-3 border-t flex justify-end space-x-3">
+                    <button
+                      class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center download-all"
+                      aria-label="Download all images for record {{ entry.ID }}"
+                      data-id="{{ entry.ID }}"
+                    >
+                        <i class="fas fa-download mr-2" aria-hidden="true"></i> Download All
                     </button>
-                    <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition flex items-center">
-                        <i class="fas fa-print mr-2"></i> Print Report
+                    <button
+                      class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition flex items-center print-report"
+                      aria-label="Print report for record {{ entry.ID }}"
+                      data-id="{{ entry.ID }}"
+                    >
+                        <i class="fas fa-print mr-2" aria-hidden="true"></i> Print Report
                     </button>
-                </div>
-            </div>
+                </footer>
+            </article>
             {% endfor %}
-        </div>
+        </section>
     </main>
 
     <!-- Footer -->
-    <footer class="bg-gray-800 text-white py-8">
+    <footer class="bg-gray-800 text-white py-8" role="contentinfo">
         <div class="container mx-auto px-6">
             <div class="flex flex-col md:flex-row justify-between items-center">
                 <div class="mb-4 md:mb-0">
@@ -177,20 +218,149 @@
                     <p class="text-gray-400 mt-1">Secure vehicle inspection records</p>
                 </div>
                 <div class="flex space-x-6">
-                    <a href="#" class="text-gray-400 hover:text-white transition">
-                        <i class="fab fa-facebook-f"></i>
+                    <a href="#" class="text-gray-400 hover:text-white transition" aria-label="Facebook">
+                        <i class="fab fa-facebook-f" aria-hidden="true"></i>
                     </a>
-                    <a href="#" class="text-gray-400 hover:text-white transition">
-                        <i class="fab fa-twitter"></i>
+                    <a href="#" class="text-gray-400 hover:text-white transition" aria-label="Twitter">
+                        <i class="fab fa-twitter" aria-hidden="true"></i>
                     </a>
-                    <a href="#" class="text-gray-400 hover:text-white transition">
-                        <i class="fab fa-linkedin-in"></i>
+                    <a href="#" class="text-gray-400 hover:text-white transition" aria-label="LinkedIn">
+                        <i class="fab fa-linkedin-in" aria-hidden="true"></i>
                     </a>
                 </div>
             </div>
             <div class="border-t border-gray-700 mt-6 pt-6 text-center text-gray-400 text-sm">
-        <p>&copy; 2025 Image Upload Gallery. All rights reserved.</p>
+                <p>&copy; 2025 Image Upload Gallery. All rights reserved.</p>
+            </div>
+        </div>
     </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+    <script>
+      // Client-side filtering by search and date
+      const searchInput = document.getElementById('search');
+      const filterInput = document.getElementById('filter');
+      const records = document.querySelectorAll('.record');
+      const recordCount = document.getElementById('recordCount');
+
+      function filterRecords() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const filterDate = filterInput.value;
+        let visibleCount = 0;
+
+        records.forEach((record) => {
+          const id = record.getAttribute('data-id');
+          const ref = record.getAttribute('data-ref');
+          const date = record.getAttribute('data-date');
+
+          const matchesSearch =
+            id.includes(searchTerm) || ref.includes(searchTerm) || searchTerm === '';
+          const matchesDate = filterDate === '' || date === filterDate;
+
+          if (matchesSearch && matchesDate) {
+            record.style.display = '';
+            visibleCount++;
+          } else {
+            record.style.display = 'none';
+          }
+        });
+
+        recordCount.innerHTML = `<i class="fas fa-images mr-1"></i> ${visibleCount} Records`;
+      }
+
+      searchInput.addEventListener('input', filterRecords);
+      filterInput.addEventListener('change', filterRecords);
+
+      // Download all images as zip
+      async function downloadAllImages(recordId) {
+        const record = Array.from(records).find(
+          (r) => r.getAttribute('data-id') === recordId.toLowerCase()
+        );
+        if (!record) return;
+
+        const zip = new JSZip();
+        const galleryImages = record.querySelectorAll('.gallery-img');
+        const folder = zip.folder(`Record_${recordId}`);
+
+        const fetchImageAsBlob = async (url) => {
+          const response = await fetch(url);
+          if (!response.ok) throw new Error('Network response was not ok');
+          return await response.blob();
+        };
+
+        for (let i = 0; i < galleryImages.length; i++) {
+          const img = galleryImages[i];
+          const imgUrl = img.src;
+          try {
+            const blob = await fetchImageAsBlob(imgUrl);
+            const ext = imgUrl.split('.').pop().split(/\#|\?/)[0];
+            folder.file(`image_${i + 1}.${ext}`, blob);
+          } catch (error) {
+            console.error('Failed to fetch image:', imgUrl, error);
+          }
+        }
+
+        zip.generateAsync({ type: 'blob' }).then((content) => {
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(content);
+          a.download = `Record_${recordId}_images.zip`;
+          a.click();
+          URL.revokeObjectURL(a.href);
+        });
+      }
+
+      // Print report for a record
+      function printReport(recordId) {
+        const record = Array.from(records).find(
+          (r) => r.getAttribute('data-id') === recordId.toLowerCase()
+        );
+        if (!record) return;
+
+        const printWindow = window.open('', '_blank');
+        if (!printWindow) return;
+
+        const styles = `
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            h1 { color: #2563eb; }
+            .image { max-width: 100%; margin-bottom: 10px; }
+            .record-header { margin-bottom: 20px; }
+          </style>
+        `;
+
+        const recordHeader = record.querySelector('header').outerHTML;
+        const imagesHtml = Array.from(record.querySelectorAll('.gallery-img'))
+          .map((img) => `<img src="${img.src}" alt="${img.alt}" class="image" />`)
+          .join('');
+
+        printWindow.document.write(`
+          <html>
+            <head><title>Print Report - Record ${recordId}</title>${styles}</head>
+            <body>
+              <h1>Insurance Record ID: ${recordId}</h1>
+              <div class="record-header">${recordHeader}</div>
+              <div class="images">${imagesHtml}</div>
+            </body>
+          </html>
+        `);
+        printWindow.document.close();
+        printWindow.focus();
+        printWindow.print();
+        printWindow.close();
+      }
+
+      // Event delegation for buttons
+      document.addEventListener('click', (e) => {
+        if (e.target.closest('.download-all')) {
+          const btn = e.target.closest('.download-all');
+          const recordId = btn.getAttribute('data-id');
+          downloadAllImages(recordId);
+        } else if (e.target.closest('.print-report')) {
+          const btn = e.target.closest('.print-report');
+          const recordId = btn.getAttribute('data-id');
+          printReport(recordId);
+        }
+      });
+    </script>
 </body>
 </html>
-
