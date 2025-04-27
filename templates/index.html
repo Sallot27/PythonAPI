@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="Motor insurance documentation gallery for vehicle inspection records">
     <title>Motor Insurance Documentation | Image Gallery</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
@@ -16,7 +15,6 @@
       .gallery-card {
         transition: transform 0.3s ease, box-shadow 0.3s ease;
         overflow: hidden;
-        position: relative;
       }
       .gallery-card:hover {
         transform: translateY(-5px);
@@ -41,7 +39,6 @@
         padding: 0.5rem;
         font-size: 0.9rem;
         text-align: center;
-        transition: all 0.3s ease;
       }
       .image-container {
         position: relative;
@@ -56,77 +53,14 @@
         padding: 2px 5px;
         border-radius: 3px;
       }
-      .loading-spinner {
-        display: none;
-        width: 20px;
-        height: 20px;
-        border: 3px solid rgba(255,255,255,0.3);
-        border-radius: 50%;
-        border-top-color: #fff;
-        animation: spin 1s ease-in-out infinite;
-        margin-right: 8px;
-      }
-      @keyframes spin {
-        to { transform: rotate(360deg); }
-      }
-      .modal {
-        display: none;
-        position: fixed;
-        z-index: 100;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0,0,0,0.9);
-        overflow: auto;
-      }
-      .modal-content {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100%;
-        width: 100%;
-      }
-      .modal-img {
-        max-width: 90%;
-        max-height: 90%;
-        object-fit: contain;
-      }
-      .close-modal {
-        position: absolute;
-        top: 20px;
-        right: 30px;
-        color: white;
-        font-size: 35px;
-        font-weight: bold;
-        cursor: pointer;
-      }
-      .close-modal:hover {
-        color: #ccc;
-      }
-      .no-results {
-        display: none;
-        text-align: center;
-        padding: 40px;
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-      }
-      .fade-in {
-        animation: fadeIn 0.3s ease-in;
-      }
-      @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-      }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
     <!-- Header -->
     <header class="bg-blue-600 text-white shadow-lg" role="banner">
         <div class="container mx-auto px-6 py-8">
-            <div class="flex flex-col md:flex-row justify-between items-center">
-                <div class="mb-4 md:mb-0">
+            <div class="flex justify-between items-center">
+                <div>
                     <h1 class="text-3xl font-bold">Motor Insurance Documentation</h1>
                     <p class="mt-2">Vehicle inspection image gallery</p>
                 </div>
@@ -134,9 +68,6 @@
                     <span class="bg-blue-500 px-3 py-1 rounded-full text-sm font-medium" id="recordCount">
                         <i class="fas fa-images mr-1"></i> {{ data|length }} Records
                     </span>
-                    <button id="helpBtn" class="bg-blue-700 hover:bg-blue-800 px-3 py-1 rounded-full text-sm font-medium transition-colors" aria-label="Help">
-                        <i class="fas fa-question-circle mr-1"></i> Help
-                    </button>
                 </div>
             </div>
         </div>
@@ -153,16 +84,15 @@
                         <input
                           type="text"
                           id="search"
-                          placeholder="Search by ID, Reference or Label..."
+                          placeholder="Search by ID or Reference..."
                           class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                           aria-describedby="searchHelp"
-                          aria-label="Search records by ID, Reference or Label"
+                          aria-label="Search records by ID or Reference"
                         />
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <i class="fas fa-search text-gray-400"></i>
                         </div>
                     </div>
-                    <p id="searchHelp" class="mt-1 text-sm text-gray-500">Search by record ID, reference number or image labels</p>
                 </div>
                 <div class="w-full md:w-1/2">
                     <label for="filter" class="block text-sm font-medium text-gray-700 mb-1">Filter by Date</label>
@@ -179,44 +109,22 @@
                     </div>
                 </div>
             </div>
-            <div class="mt-4 flex flex-wrap gap-2">
-                <button id="resetFilters" class="px-3 py-1 text-sm bg-gray-200 hover:bg-gray-300 rounded transition-colors">
-                    <i class="fas fa-undo mr-1"></i> Reset Filters
-                </button>
-                <button id="expandAll" class="px-3 py-1 text-sm bg-blue-100 hover:bg-blue-200 text-blue-800 rounded transition-colors">
-                    <i class="fas fa-expand mr-1"></i> Expand All
-                </button>
-                <button id="collapseAll" class="px-3 py-1 text-sm bg-blue-100 hover:bg-blue-200 text-blue-800 rounded transition-colors">
-                    <i class="fas fa-compress mr-1"></i> Collapse All
-                </button>
-            </div>
         </section>
-
-        <!-- No Results Message -->
-        <div id="noResults" class="no-results">
-            <i class="fas fa-search fa-3x text-gray-400 mb-4"></i>
-            <h3 class="text-xl font-semibold text-gray-700 mb-2">No records found</h3>
-            <p class="text-gray-500">Try adjusting your search or filter criteria</p>
-        </div>
 
         <!-- Records Section -->
         <section aria-label="Insurance records" class="mb-6">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-2xl font-bold text-gray-800">Insurance Records</h2>
-                <div class="text-sm text-gray-500" id="showingCount">Showing {{ data|length }} of {{ data|length }} records</div>
-            </div>
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Insurance Records</h2>
 
             {% for entry in data %}
             <article
-              class="bg-white rounded-xl shadow-md overflow-hidden mb-8 record transition-all duration-300"
+              class="bg-white rounded-xl shadow-md overflow-hidden mb-8 record"
               data-id="{{ entry.ID | lower }}"
               data-ref="{{ entry.Ref | lower }}"
               data-date="{{ entry.date }}"
-              data-labels="{% for img, label in entry.images %}{{ label | lower }} {% endfor %}"
               aria-label="Insurance record ID {{ entry.ID }}"
             >
                 <!-- Record Header -->
-                <header class="bg-gray-50 px-6 py-4 border-b cursor-pointer record-header" tabindex="0" aria-expanded="true">
+                <header class="bg-gray-50 px-6 py-4 border-b">
                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                         <div>
                             <h3 class="text-lg font-semibold text-gray-800">
@@ -244,7 +152,7 @@
                 </header>
 
                 <!-- Images Gallery -->
-                <div class="p-6 record-content">
+                <div class="p-6">
                     <div class="gallery-container">
                         {% for img, label in entry.images %}
                         <div
@@ -255,12 +163,9 @@
                             <div class="image-container">
                                 <img
                                   src="/uploads/{{ img }}"
-                                  alt="Vehicle image showing {{ label }}"
-                                  class="gallery-img cursor-pointer view-image"
+                                  alt="Vehicle image {{ label }}"
+                                  class="gallery-img cursor-pointer"
                                   loading="lazy"
-                                  data-src="/uploads/{{ img }}"
-                                  data-label="{{ label }}"
-                                  data-record="{{ entry.ID }}"
                                 />
                                 <div class="image-label">
                                     {{ label }}
@@ -275,13 +180,12 @@
                 </div>
 
                 <!-- Actions -->
-                <footer class="bg-gray-50 px-6 py-3 border-t flex flex-wrap justify-end gap-3">
+                <footer class="bg-gray-50 px-6 py-3 border-t flex justify-end space-x-3">
                     <button
                       class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center download-all"
                       aria-label="Download all images for record {{ entry.ID }}"
                       data-id="{{ entry.ID }}"
                     >
-                        <div class="loading-spinner"></div>
                         <i class="fas fa-download mr-2" aria-hidden="true"></i> Download All
                     </button>
                     <button
@@ -291,59 +195,11 @@
                     >
                         <i class="fas fa-print mr-2" aria-hidden="true"></i> Print Report
                     </button>
-                    <button
-                      class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition flex items-center share-record"
-                      aria-label="Share record {{ entry.ID }}"
-                      data-id="{{ entry.ID }}"
-                    >
-                        <i class="fas fa-share-alt mr-2" aria-hidden="true"></i> Share
-                    </button>
                 </footer>
             </article>
             {% endfor %}
         </section>
     </main>
-
-    <!-- Image Modal -->
-    <div id="imageModal" class="modal" aria-hidden="true" role="dialog">
-        <span class="close-modal" aria-label="Close modal">&times;</span>
-        <div class="modal-content">
-            <img id="modalImage" class="modal-img" src="" alt="" />
-        </div>
-    </div>
-
-    <!-- Help Modal -->
-    <div id="helpModal" class="modal" aria-hidden="true" role="dialog">
-        <span class="close-modal" aria-label="Close modal">&times;</span>
-        <div class="modal-content p-8">
-            <div class="bg-white rounded-lg shadow-xl p-6 max-w-2xl mx-auto">
-                <h2 class="text-2xl font-bold text-gray-800 mb-4">Gallery Help</h2>
-                <div class="space-y-4">
-                    <div>
-                        <h3 class="font-semibold text-lg text-blue-600"><i class="fas fa-search mr-2"></i>Searching</h3>
-                        <p class="text-gray-700">You can search by:</p>
-                        <ul class="list-disc pl-5 mt-2 space-y-1">
-                            <li>Record ID (e.g. "INS-2023-001")</li>
-                            <li>Reference number</li>
-                            <li>Image labels (e.g. "front", "damage")</li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h3 class="font-semibold text-lg text-blue-600"><i class="fas fa-filter mr-2"></i>Filtering</h3>
-                        <p class="text-gray-700">Use the date filter to show only records from a specific date.</p>
-                    </div>
-                    <div>
-                        <h3 class="font-semibold text-lg text-blue-600"><i class="fas fa-images mr-2"></i>Viewing Images</h3>
-                        <p class="text-gray-700">Click on any image to view it in full screen mode.</p>
-                    </div>
-                    <div>
-                        <h3 class="font-semibold text-lg text-blue-600"><i class="fas fa-download mr-2"></i>Downloading</h3>
-                        <p class="text-gray-700">Download all images for a record as a ZIP file by clicking "Download All".</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Footer -->
     <footer class="bg-gray-800 text-white py-8" role="contentinfo">
@@ -354,28 +210,150 @@
                     <p class="text-gray-400 mt-1">Secure vehicle inspection records</p>
                 </div>
                 <div class="flex space-x-6">
-                    <a href="#" class="text-gray-400 hover:text-white transition" aria-label="Contact support">
-                        <i class="fas fa-envelope mr-1"></i> Support
+                    <a href="#" class="text-gray-400 hover:text-white transition" aria-label="Facebook">
+                        <i class="fab fa-facebook-f" aria-hidden="true"></i>
                     </a>
-                    <a href="#" class="text-gray-400 hover:text-white transition" aria-label="Privacy policy">
-                        <i class="fas fa-lock mr-1"></i> Privacy
+                    <a href="#" class="text-gray-400 hover:text-white transition" aria-label="Twitter">
+                        <i class="fab fa-twitter" aria-hidden="true"></i>
                     </a>
-                    <a href="#" class="text-gray-400 hover:text-white transition" aria-label="Terms of service">
-                        <i class="fas fa-file-alt mr-1"></i> Terms
+                    <a href="#" class="text-gray-400 hover:text-white transition" aria-label="LinkedIn">
+                        <i class="fab fa-linkedin-in" aria-hidden="true"></i>
                     </a>
                 </div>
             </div>
             <div class="border-t border-gray-700 mt-6 pt-6 text-center text-gray-400 text-sm">
-                <p>&copy; 2025 Image Upload Gallery. All rights reserved. v2.1.0</p>
+                <p>&copy; 2025 Image Upload Gallery. All rights reserved.</p>
             </div>
         </div>
     </footer>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-to-blob@1.0.0/canvas-to-blob.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.min.js"></script>
+    <script>
+      // Client-side filtering by search and date
+      const searchInput = document.getElementById('search');
+      const filterInput = document.getElementById('filter');
+      const records = document.querySelectorAll('.record');
+      const recordCount = document.getElementById('recordCount');
+
+      function filterRecords() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const filterDate = filterInput.value;
+        let visibleCount = 0;
+
+        records.forEach((record) => {
+          const id = record.getAttribute('data-id');
+          const ref = record.getAttribute('data-ref');
+          const date = record.getAttribute('data-date');
+
+          const matchesSearch =
+            id.includes(searchTerm) || ref.includes(searchTerm) || searchTerm === '';
+          const matchesDate = filterDate === '' || date === filterDate;
+
+          if (matchesSearch && matchesDate) {
+            record.style.display = '';
+            visibleCount++;
+          } else {
+            record.style.display = 'none';
+          }
+        });
+
+        recordCount.innerHTML = `<i class="fas fa-images mr-1"></i> ${visibleCount} Records`;
+      }
+
+      searchInput.addEventListener('input', filterRecords);
+      filterInput.addEventListener('change', filterRecords);
+
+      // Download all images as zip
+      async function downloadAllImages(recordId) {
+        const record = Array.from(records).find(
+          (r) => r.getAttribute('data-id') === recordId.toLowerCase()
+        );
+        if (!record) return;
+
+        const zip = new JSZip();
+        const galleryImages = record.querySelectorAll('.gallery-img');
+        const folder = zip.folder(`Record_${recordId}`);
+
+        const fetchImageAsBlob = async (url) => {
+          const response = await fetch(url);
+          if (!response.ok) throw new Error('Network response was not ok');
+          return await response.blob();
+        };
+
+        for (let i = 0; i < galleryImages.length; i++) {
+          const img = galleryImages[i];
+          const imgUrl = img.src;
+          try {
+            const blob = await fetchImageAsBlob(imgUrl);
+            const ext = imgUrl.split('.').pop().split(/\#|\?/)[0];
+            folder.file(`image_${i + 1}.${ext}`, blob);
+          } catch (error) {
+            console.error('Failed to fetch image:', imgUrl, error);
+          }
+        }
+
+        zip.generateAsync({ type: 'blob' }).then((content) => {
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(content);
+          a.download = `Record_${recordId}_images.zip`;
+          a.click();
+          URL.revokeObjectURL(a.href);
+        });
+      }
+
+      // Print report for a record
+      function printReport(recordId) {
+        const record = Array.from(records).find(
+          (r) => r.getAttribute('data-id') === recordId.toLowerCase()
+        );
+        if (!record) return;
+
+        const printWindow = window.open('', '_blank');
+        if (!printWindow) return;
+
+        const styles = `
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            h1 { color: #2563eb; }
+            .image { max-width: 100%; margin-bottom: 10px; }
+            .record-header { margin-bottom: 20px; }
+          </style>
+        `;
+
+        const recordHeader = record.querySelector('header').outerHTML;
+        const imagesHtml = Array.from(record.querySelectorAll('.gallery-img'))
+          .map((img) => `<img src="${img.src}" alt="${img.alt}" class="image" />`)
+          .join('');
+
+        printWindow.document.write(`
+          <html>
+            <head><title>Print Report - Record ${recordId}</title>${styles}</head>
+            <body>
+              <h1>Insurance Record ID: ${recordId}</h1>
+              <div class="record-header">${recordHeader}</div>
+              <div class="images">${imagesHtml}</div>
+            </body>
+          </html>
+        `);
+        printWindow.document.close();
+        printWindow.focus();
+        printWindow.print();
+        printWindow.close();
+      }
+
+      // Event delegation for buttons
+      document.addEventListener('click', (e) => {
+        if (e.target.closest('.download-all')) {
+          const btn = e.target.closest('.download-all');
+          const recordId = btn.getAttribute('data-id');
+          downloadAllImages(recordId);
+        } else if (e.target.closest('.print-report')) {
+          const btn = e.target.closest('.print-report');
+          const recordId = btn.getAttribute('data-id');
+          printReport(recordId);
+        }
+      });
+    </script>
 </body>
 </html>
+
