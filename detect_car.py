@@ -3,6 +3,7 @@ from PIL import Image
 import base64
 import io
 import sys
+import os
 
 def encode_image(image_path):
     with Image.open(image_path) as img:
@@ -13,17 +14,44 @@ def encode_image(image_path):
 def detect_car(image_path):
     image_base64 = encode_image(image_path)
     response = ollama.chat(
-    model='llava:3.2',  # Use Ollama Vision 3.2
-    messages=[
-        {
-            'role': 'user',
-            'content': 'Does this image contain a car? Answer only "yes" or "no".',
-            'images': [image_base64],
-        }
-    ]
-)
+        model='llava:3.2',
+        messages=[
+            {
+                'role': 'user',
+                'content': 'Does this image contain a car or part of a car? Answer only "yes" or "no".',
+                'images': [image_base64],
+            }
+        ]
+    )
     answer = response['message']['content'].strip().lower()
     return answer == 'yes'
+
+def process_image(image_path, output_dir="cars"):
+    try:
+        if detect_car(image_path):
+            # Create output directory if it doesn't exist
+            os.makedirs(output_dir, exist_ok=True)
+            
+            # Save the image
+            filename = os.path.basename(image_path)
+            output_path = os.path.join(output_dir, filename)
+            
+            # Handle duplicate filenames
+            counter = 1
+            while os.path.exists(output_path):
+                name, ext = os.path.splitext(filename)
+                output_path = os.path.join(output_dir, f"{name}_{counter}{ext}")
+                counter += 1
+            
+            with Image.open(image_path) as img:
+                img.save(output_path)
+            print(f"✅ Car detected. Image saved to: {output_path}")
+        else:
+            # Delete the image if no car is detected
+            os.remove(image_path)
+            print("❌ No car detected. Image disposed.")
+    except Exception as e:
+        print(f"⚠️ Error processing image: {e}")
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
@@ -31,7 +59,4 @@ if __name__ == '__main__':
         sys.exit(1)
 
     image_path = sys.argv[1]
-    if detect_car(image_path):
-        print("✅ The image contains a car.")
-    else:
-        print("❌ The image does not contain a car.")
+    process_image(image_path)

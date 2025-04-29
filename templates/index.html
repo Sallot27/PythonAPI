@@ -61,6 +61,13 @@
       padding: 2px 5px;
       border-radius: 3px;
     }
+    
+    .rejected-images {
+      background-color: #fef2f2;
+      border-left: 4px solid #ef4444;
+      padding: 1rem;
+      margin-top: 1rem;
+    }
   </style>
 </head>
 
@@ -84,6 +91,47 @@
 
   <!-- Main Content -->
   <main class="container mx-auto px-6 py-8" role="main">
+    <!-- Upload Form -->
+    <section aria-label="Upload new record" class="mb-8 bg-white rounded-lg shadow p-6">
+      <h2 class="text-2xl font-bold text-gray-800 mb-4">Upload New Inspection</h2>
+      <form id="uploadForm" enctype="multipart/form-data" class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label for="ID" class="block text-sm font-medium text-gray-700">Policy ID</label>
+            <input type="text" id="ID" name="ID" required
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border">
+          </div>
+          <div>
+            <label for="Ref" class="block text-sm font-medium text-gray-700">Reference Number</label>
+            <input type="text" id="Ref" name="Ref" required
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border">
+          </div>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Upload Images</label>
+          <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+            <div class="space-y-1 text-center">
+              <div class="flex text-sm text-gray-600">
+                <label for="file-upload" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none">
+                  <span>Upload files</span>
+                  <input id="file-upload" name="file-upload" type="file" class="sr-only" multiple accept="image/*">
+                </label>
+                <p class="pl-1">or drag and drop</p>
+              </div>
+              <p class="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="flex justify-end">
+          <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center">
+            <i class="fas fa-upload mr-2"></i> Upload Inspection
+          </button>
+        </div>
+      </form>
+    </section>
+
     <!-- Search and Filters -->
     <section aria-label="Search and filter records" class="mb-8 bg-white rounded-lg shadow p-6">
       <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -99,15 +147,13 @@
           </div>
         </div>
         <div class="w-full md:w-1/2">
-          <label for="filter" class="block text-sm font-medium text-gray-700 mb-1">Filter by Date</label>
-          <div class="relative">
-            <input type="date" id="filter"
-              class="w-full pl-4 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-              aria-label="Filter records by date" />
-            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-              <i class="fas fa-calendar text-gray-400"></i>
-            </div>
-          </div>
+          <label for="filter" class="block text-sm font-medium text-gray-700 mb-1">Filter by Status</label>
+          <select id="filter" class="w-full pl-4 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+            aria-label="Filter records by status">
+            <option value="all">All Records</option>
+            <option value="with_car">With Car Detected</option>
+            <option value="without_car">Without Car Detected</option>
+          </select>
         </div>
       </div>
     </section>
@@ -117,8 +163,11 @@
       <h2 class="text-2xl font-bold text-gray-800 mb-4">Insurance Records</h2>
 
       {% for entry in data %}
-      <article class="bg-white rounded-xl shadow-md overflow-hidden mb-8 record" data-id="{{ entry.ID | lower }}"
-        data-ref="{{ entry.Ref | lower }}" data-date="{{ entry.date }}" aria-label="Insurance record ID {{ entry.ID }}">
+      <article class="bg-white rounded-xl shadow-md overflow-hidden mb-8 record" 
+               data-id="{{ entry.ID | lower }}"
+               data-ref="{{ entry.Ref | lower }}"
+               data-has-car="{% if entry.images %}true{% else %}false{% endif %}"
+               aria-label="Insurance record ID {{ entry.ID }}">
         <!-- Record Header -->
         <header class="bg-gray-50 px-6 py-4 border-b">
           <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
@@ -131,15 +180,15 @@
               </p>
             </div>
             <div class="mt-2 sm:mt-0">
-              <span
-                class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800"
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium 
+                          {% if entry.images %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}"
+                aria-label="{% if entry.images %}Car detected{% else %}No car detected{% endif %}">
+                <i class="fas fa-car mr-1" aria-hidden="true"></i> 
+                {% if entry.images %}Car Detected{% else %}No Car{% endif %}
+              </span>
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 ml-2"
                 aria-label="{{ entry.images|length }} images">
                 <i class="fas fa-images mr-1" aria-hidden="true"></i> {{ entry.images|length }} Images
-              </span>
-              <span
-                class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 ml-2"
-                aria-label="Date {{ entry.date }}">
-                <i class="fas fa-calendar-day mr-1" aria-hidden="true"></i> {{ entry.date }}
               </span>
             </div>
           </div>
@@ -147,51 +196,64 @@
 
         <!-- Images Gallery -->
         <div class="p-6">
+          {% if entry.images %}
           <div class="gallery-container">
             {% for img in entry.images %}
             <div class="gallery-card rounded-lg overflow-hidden border border-gray-200" role="group"
-              aria-label="Image {{ loop.index }}: {% if loop.index == 1 %}Front View{% elif loop.index == 2 %}Back View{% elif loop.index == 3 %}Right Side{% elif loop.index == 4 %}Left Side{% elif loop.index == 5 %}Engine{% elif loop.index == 6 %}Chassis{% endif %}">
-              {% set status = entry.statuses | selectattr('filename', 'equalto', img) | list | first %}
+              aria-label="Image {{ loop.index }}">
               <div class="image-container">
-                <img src="/uploads/{{ img }}" alt="Vehicle image {{ loop.index }}" class="gallery-img cursor-pointer"
+                <img src="/car_images/{{ img }}" alt="Vehicle image {{ loop.index }}" class="gallery-img cursor-pointer"
                   loading="lazy" />
                 <div class="image-label">
-                  {% if loop.index == 1 %}Front View{% endif %}
-                  {% if loop.index == 2 %}Back View{% endif %}
-                  {% if loop.index == 3 %}Right Side{% endif %}
-                  {% if loop.index == 4 %}Left Side{% endif %}
-                  {% if loop.index == 5 %}Engine{% endif %}
-                  {% if loop.index == 6 %}Chassis{% endif %}
+                  Image {{ loop.index }}
                   <br />
-                  <span
-                    class="text-xs {% if status and status.car_detected %}text-green-400{% else %}text-red-400{% endif %}">
-                    AI: {% if status and status.car_detected %}Car detected{% else %}Not a car{% endif %}
+                  <span class="text-xs text-green-400">
+                    AI: Car detected
                   </span>
                 </div>
                 <div class="watermark">
-                  {{ entry.ID }} | {{ entry.date }}
+                  {{ entry.ID }}
                 </div>
               </div>
-
             </div>
             {% endfor %}
           </div>
+          {% endif %}
+
+          {% if entry.rejected_images %}
+          <div class="rejected-images rounded-lg mt-4">
+            <h4 class="font-medium text-red-700 mb-2">
+              <i class="fas fa-exclamation-triangle mr-2"></i> Rejected Images (No Car Detected)
+            </h4>
+            <ul class="list-disc list-inside text-sm text-red-600">
+              {% for img in entry.rejected_images %}
+              <li>{{ img }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+          {% endif %}
         </div>
 
         <!-- Actions -->
         <footer class="bg-gray-50 px-6 py-3 border-t flex justify-end space-x-3">
-          <button
-            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center download-all"
+          {% if entry.images %}
+          <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center download-all"
             aria-label="Download all images for record {{ entry.ID }}" data-id="{{ entry.ID }}">
             <i class="fas fa-download mr-2" aria-hidden="true"></i> Download All
           </button>
-          <button
-            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition flex items-center print-report"
+          <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition flex items-center print-report"
             aria-label="Print report for record {{ entry.ID }}" data-id="{{ entry.ID }}">
             <i class="fas fa-print mr-2" aria-hidden="true"></i> Print Report
           </button>
+          {% endif %}
         </footer>
       </article>
+      {% else %}
+      <div class="bg-white rounded-lg shadow p-8 text-center">
+        <i class="fas fa-folder-open text-4xl text-gray-400 mb-4"></i>
+        <h3 class="text-xl font-medium text-gray-700">No records found</h3>
+        <p class="text-gray-500 mt-2">Upload your first vehicle inspection to get started</p>
+      </div>
       {% endfor %}
     </section>
   </main>
@@ -217,34 +279,64 @@
         </div>
       </div>
       <div class="border-t border-gray-700 mt-6 pt-6 text-center text-gray-400 text-sm">
-        <p>&copy; 2025 Image Upload Gallery. All rights reserved.</p>
+        <p>&copy; 2025 Motor Insurance Documentation. All rights reserved.</p>
       </div>
     </div>
   </footer>
 
+  <!-- Modal -->
+  <div id="uploadModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-lg p-6 max-w-md w-full">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-xl font-bold">Uploading Images</h3>
+        <button id="closeModal" class="text-gray-500 hover:text-gray-700">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="mb-4">
+        <div class="w-full bg-gray-200 rounded-full h-2.5">
+          <div id="progressBar" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
+        </div>
+        <p id="progressText" class="text-sm text-gray-600 mt-2">Processing 0 of 0 images</p>
+      </div>
+      <div id="uploadResults" class="text-sm">
+        <!-- Results will be shown here -->
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
   <script>
-    // Client-side filtering by search and date
+    // Client-side filtering
     const searchInput = document.getElementById('search');
     const filterInput = document.getElementById('filter');
     const records = document.querySelectorAll('.record');
     const recordCount = document.getElementById('recordCount');
+    const uploadForm = document.getElementById('uploadForm');
+    const uploadModal = document.getElementById('uploadModal');
+    const closeModal = document.getElementById('closeModal');
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    const uploadResults = document.getElementById('uploadResults');
 
     function filterRecords() {
       const searchTerm = searchInput.value.toLowerCase();
-      const filterDate = filterInput.value;
+      const filterValue = filterInput.value;
       let visibleCount = 0;
 
       records.forEach((record) => {
         const id = record.getAttribute('data-id');
         const ref = record.getAttribute('data-ref');
-        const date = record.getAttribute('data-date');
+        const hasCar = record.getAttribute('data-has-car');
 
         const matchesSearch =
           id.includes(searchTerm) || ref.includes(searchTerm) || searchTerm === '';
-        const matchesDate = filterDate === '' || date === filterDate;
+        const matchesFilter = 
+          filterValue === 'all' || 
+          (filterValue === 'with_car' && hasCar === 'true') ||
+          (filterValue === 'without_car' && hasCar === 'false');
 
-        if (matchesSearch && matchesDate) {
+        if (matchesSearch && matchesFilter) {
           record.style.display = '';
           visibleCount++;
         } else {
@@ -257,6 +349,58 @@
 
     searchInput.addEventListener('input', filterRecords);
     filterInput.addEventListener('change', filterRecords);
+
+    // Handle form submission
+    uploadForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const formData = new FormData();
+      formData.append('ID', document.getElementById('ID').value);
+      formData.append('Ref', document.getElementById('Ref').value);
+      
+      const files = document.getElementById('file-upload').files;
+      for (let i = 0; i < files.length; i++) {
+        formData.append('images', files[i]);
+      }
+      
+      // Show modal
+      uploadModal.classList.remove('hidden');
+      uploadResults.innerHTML = '';
+      progressBar.style.width = '0%';
+      progressText.textContent = `Processing 0 of ${files.length} images`;
+      
+      try {
+        const response = await fetch('/api/data', {
+          method: 'POST',
+          body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          // Update UI with new record
+          location.reload();
+        } else {
+          uploadResults.innerHTML = `
+            <div class="text-red-600">
+              <i class="fas fa-exclamation-circle mr-2"></i>
+              ${data.error || 'Upload failed'}
+            </div>
+          `;
+        }
+      } catch (error) {
+        uploadResults.innerHTML = `
+          <div class="text-red-600">
+            <i class="fas fa-exclamation-circle mr-2"></i>
+            Network error: ${error.message}
+          </div>
+        `;
+      }
+    });
+
+    closeModal.addEventListener('click', () => {
+      uploadModal.classList.add('hidden');
+    });
 
     // Download all images as zip
     async function downloadAllImages(recordId) {
@@ -312,6 +456,7 @@
             h1 { color: #2563eb; }
             .image { max-width: 100%; margin-bottom: 10px; }
             .record-header { margin-bottom: 20px; }
+            .rejected { color: #ef4444; margin-top: 10px; }
           </style>
         `;
 
@@ -319,6 +464,14 @@
       const imagesHtml = Array.from(record.querySelectorAll('.gallery-img'))
         .map((img) => `<img src="${img.src}" alt="${img.alt}" class="image" />`)
         .join('');
+      
+      const rejectedHtml = record.querySelector('.rejected-images') ? 
+        `<div class="rejected">
+          <h3>Rejected Images (No Car Detected):</h3>
+          <ul>
+            ${Array.from(record.querySelectorAll('.rejected-images li')).map(li => `<li>${li.textContent}</li>`).join('')}
+          </ul>
+        </div>` : '';
 
       printWindow.document.write(`
           <html>
@@ -327,6 +480,7 @@
               <h1>Insurance Record ID: ${recordId}</h1>
               <div class="record-header">${recordHeader}</div>
               <div class="images">${imagesHtml}</div>
+              ${rejectedHtml}
             </body>
           </html>
         `);
@@ -350,3 +504,4 @@
     });
   </script>
 </body>
+</html>
