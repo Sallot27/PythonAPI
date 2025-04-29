@@ -1,7 +1,4 @@
 Flask
 gunicorn
 ollama
-io
-sys
-base64
 Image
