@@ -61,11 +61,13 @@ def add_data():
     if not saved_paths:
         return jsonify({"error": "No valid car images were uploaded."}), 400
 
-   new_entry = {
-    "ID": id_value,
-    "Ref": ref_value,
-    "images": saved_paths,
-}
+    new_entry = {
+        "ID": id_value,
+        "Ref": ref_value,
+        "images": saved_paths,
+        "statuses": image_statuses,  # include AI results for rendering
+        "date": datetime.now().strftime("%Y-%m-%d")
+                }
     data_store.append(new_entry)
 
     return jsonify({
