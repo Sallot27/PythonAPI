@@ -7,7 +7,7 @@ import sys
 def encode_image(image_path):
     with Image.open(image_path) as img:
         buffered = io.BytesIO()
-        img.save(buffered, format="JPEG")
+        img.save(buffered, format="png")
         return base64.b64encode(buffered.getvalue()).decode("utf-8")
 
 def detect_car(image_path):
