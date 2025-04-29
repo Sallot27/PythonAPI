@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify, send_from_directory, render_template
 from werkzeug.utils import secure_filename
+from detect_car import detect_car
 import os
 
 app = Flask(__name__)
@@ -32,13 +33,9 @@ def add_data():
     id_value = request.form.get('ID')
     ref_value = request.form.get('Ref')
 
-    if not id_value:
-        return jsonify({"error": "ID is required."}), 400
+    if not id_value or not ref_value:
+        return jsonify({"error": "ID and Ref are required."}), 400
 
-    if not ref_value:
-        return jsonify({"error": "Ref is required."}), 400
-
-    # Get all uploaded files
     image_files = []
     for file_key in request.files:
         file = request.files[file_key]
@@ -47,25 +44,37 @@ def add_data():
 
     saved_paths = []
     for img in image_files:
-        try:
-            filename = secure_filename(img.filename)
-            save_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            img.save(save_path)
-            saved_paths.append(filename)
-        except Exception as e:
-            return jsonify({"error": f"Failed to save image: {str(e)}"}), 500
+        filename = secure_filename(img.filename)
+        save_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        img.save(save_path)
 
-    new_entry = {
-        "ID": id_value,
-        "Ref": ref_value,
-        "images": saved_paths
-    }
+        try:
+            if detect_car(save_path):
+                saved_paths.append(filename)
+            else:
+                os.remove(save_path)  # delete image without car
+        except Exception as e:
+            if os.path.exists(save_path):
+                os.remove(save_path)
+            print(f"Error checking image: {e}")
+
+    if not saved_paths:
+        return jsonify({"error": "No valid car images were uploaded."}), 400
+
+   new_entry = {
+    "ID": id_value,
+    "Ref": ref_value,
+    "images": saved_paths,
+    "statuses": image_statuses,  # include AI results for rendering
+    "date": datetime.now().strftime("%Y-%m-%d")
+}
     data_store.append(new_entry)
 
     return jsonify({
-        "message": "Data successfully saved.",
+        "message": "Data saved (only car images kept).",
         "data": new_entry
     }), 201
+
 
 @app.route('/api/data', methods=['GET'])
 def get_data():
