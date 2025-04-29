@@ -23,7 +23,7 @@ def index():
     # Only show images currently in temp storage
     return render_template('index.html', images=temp_storage)
 
-@app.route('/upload', methods=['POST'])
+@app.route('/api/data', methods=['POST'])
 def upload():
     if 'file' not in request.files:
         return jsonify({"error": "No file part"}), 400
