@@ -1,80 +1,54 @@
-from flask import Flask, request, jsonify, send_from_directory, render_template
+from flask import Flask, request, jsonify, render_template, send_from_directory
 from werkzeug.utils import secure_filename
 import os
+import tempfile
+import atexit
 
 app = Flask(__name__)
 
-# Configuration
-UPLOAD_FOLDER = 'uploads'
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+# Temporary in-memory storage (resets on server restart)
+temp_storage = []
+temp_dir = tempfile.mkdtemp()
 
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB limit
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+# Cleanup function
+def cleanup():
+    import shutil
+    shutil.rmtree(temp_dir, ignore_errors=True)
+    print("Cleaned up temporary files")
 
-# Enable CORS (important for Flutter)
-@app.after_request
-def after_request(response):
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-    response.headers.add('Access-Control-Allow-Methods', 'GET,POST')
-    return response
-
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+atexit.register(cleanup)
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    # Only show images currently in temp storage
+    return render_template('index.html', images=temp_storage)
 
-@app.route('/api/data', methods=['POST'])
-def add_data():
-    # Check if the request contains files
-    if not request.files:
-        return jsonify({"error": "No files provided"}), 400
-
-    # Get form data
-    id_value = request.form.get('ID')
-    ref_value = request.form.get('Ref')
-    
-    if not id_value or not ref_value:
-        return jsonify({"error": "Both ID and Ref are required"}), 400
-
-    saved_files = []
-    errors = []
-
-    # Process each file
-    for file_key in request.files:
-        file = request.files[file_key]
+@app.route('/upload', methods=['POST'])
+def upload():
+    if 'file' not in request.files:
+        return jsonify({"error": "No file part"}), 400
         
-        if file and allowed_file(file.filename):
-            try:
-                filename = secure_filename(file.filename)
-                filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                file.save(filepath)
-                saved_files.append(filename)
-            except Exception as e:
-                errors.append(f"Failed to save {file.filename}: {str(e)}")
-        else:
-            errors.append(f"Invalid file type: {file.filename}")
-
-    if errors:
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
+        
+    if file:
+        filename = secure_filename(file.filename)
+        temp_path = os.path.join(temp_dir, filename)
+        file.save(temp_path)
+        
+        # Store in temporary list
+        temp_storage.append(filename)
+        
         return jsonify({
-            "message": "Some files failed to upload",
-            "saved_files": saved_files,
-            "errors": errors
-        }), 207  # Multi-status
+            "message": "File temporarily uploaded",
+            "filename": filename,
+            "warning": "Files will disappear after refresh"
+        }), 201
 
-    return jsonify({
-        "message": "All files uploaded successfully",
-        "saved_files": saved_files,
-        "ID": id_value,
-        "Ref": ref_value
-    }), 201
-
-@app.route('/uploads/<filename>')
-def uploaded_file(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+@app.route('/temp/<filename>')
+def serve_temp(filename):
+    return send_from_directory(temp_dir, filename)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5000, debug=True)
