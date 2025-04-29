@@ -1,121 +1,151 @@
-from flask import Flask, request, jsonify, send_from_directory, render_template
-from werkzeug.utils import secure_filename
-from detect_car import process_image  # Using the modified version from previous code
+from flask import Flask, request, jsonify
 import os
+from werkzeug.utils import secure_filename
 from PIL import Image
+import ollama
+import base64
+import io
 
 app = Flask(__name__)
 
 # Configuration
 UPLOAD_FOLDER = 'uploads'
-CAR_IMAGES_FOLDER = 'car_images'  # Folder to store images with cars
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+REQUIRED_ANGLES = ['front', 'rear', 'right_side', 'left_side', 'chassis', 'engine']
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['CAR_IMAGES_FOLDER'] = CAR_IMAGES_FOLDER
-
-# Create necessary directories
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-os.makedirs(CAR_IMAGES_FOLDER, exist_ok=True)
-
-data_store = []
 
 def allowed_file(filename):
-    """Check if the uploaded file is allowed."""
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-@app.route('/')
-def index():
-    """Render the index page."""
-    return render_template('index.html', data=data_store)
+def encode_image(image_path):
+    with Image.open(image_path) as img:
+        buffered = io.BytesIO()
+        img.save(buffered, format="PNG")
+        return base64.b64encode(buffered.getvalue()).decode("utf-8")
 
-@app.route('/uploads/<filename>')
-def uploaded_file(filename):
-    """Serve the uploaded files."""
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+def validate_image_quality(image_path):
+    try:
+        with Image.open(image_path) as img:
+            # Check image resolution
+            if img.width < 800 or img.height < 600:
+                return False, "Image resolution too low (minimum 800x600)"
+            
+            # Check if image is blurry (simple variance of Laplacian)
+            # You might need to install opencv-python for more advanced checks
+            return True, "Image quality OK"
+    except Exception as e:
+        return False, f"Invalid image: {str(e)}"
 
-@app.route('/car_images/<filename>')
-def car_image_file(filename):
-    """Serve the car images."""
-    return send_from_directory(app.config['CAR_IMAGES_FOLDER'], filename)
+def detect_car_part(image_path, expected_part):
+    image_base64 = encode_image(image_path)
+    
+    prompts = {
+        'front': "Is this a clear image of the FRONT view of a car? Answer only 'yes' or 'no'.",
+        'rear': "Is this a clear image of the REAR view of a car? Answer only 'yes' or 'no'.",
+        'right_side': "Is this a clear image of the RIGHT SIDE view of a car? Answer only 'yes' or 'no'.",
+        'left_side': "Is this a clear image of the LEFT SIDE view of a car? Answer only 'yes' or 'no'.",
+        'chassis': "Is this a clear image of a car's CHASSIS NUMBER? Answer only 'yes' or 'no'.",
+        'engine': "Is this a clear image of a car's ENGINE? Answer only 'yes' or 'no'."
+    }
+    
+    response = ollama.chat(
+        model='llava:3.2',
+        messages=[
+            {
+                'role': 'user',
+                'content': prompts[expected_part],
+                'images': [image_base64],
+            }
+        ]
+    )
+    answer = response['message']['content'].strip().lower()
+    return answer == 'yes'
 
 @app.route('/api/data', methods=['POST'])
-def add_data():
-    """Handle image uploads and data submission."""
-    id_value = request.form.get('ID')
-    ref_value = request.form.get('Ref')
-
-    if not id_value:
-        return jsonify({"error": "ID is required."}), 400
-
-    if not ref_value:
-        return jsonify({"error": "Ref is required."}), 400
-
-    # Get all uploaded files
-    image_files = []
-    for file_key in request.files:
+def upload_documentation():
+    # Validate required fields
+    if not request.form.get('ID'):
+        return jsonify({"error": "Policy ID is required"}), 400
+    if not request.form.get('Ref'):
+        return jsonify({"error": "Reference number is required"}), 400
+    
+    # Validate all required angles are provided
+    received_angles = set(request.form.getlist('angles[]'))
+    missing_angles = set(REQUIRED_ANGLES) - received_angles
+    if missing_angles:
+        return jsonify({
+            "error": f"Missing required angles: {', '.join(missing_angles)}",
+            "required_angles": REQUIRED_ANGLES
+        }), 400
+    
+    # Process each image
+    results = {}
+    validation_passed = True
+    validation_errors = []
+    
+    for angle in REQUIRED_ANGLES:
+        file_key = f"image_{angle}"
+        if file_key not in request.files:
+            validation_passed = False
+            validation_errors.append(f"Missing image for {angle}")
+            continue
+            
         file = request.files[file_key]
-        if file and allowed_file(file.filename):
-            image_files.append(file)
-
-    saved_paths = []
-    rejected_images = []
-    for img in image_files:
-        try:
-            # First save to temp location for processing
-            filename = secure_filename(img.filename)
-            temp_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            img.save(temp_path)
+        if not file or file.filename == '':
+            validation_passed = False
+            validation_errors.append(f"Empty file for {angle}")
+            continue
             
-            # Process the image (will be moved to car_images if contains car)
-            process_image(temp_path, output_dir=app.config['CAR_IMAGES_FOLDER'])
+        if not allowed_file(file.filename):
+            validation_passed = False
+            validation_errors.append(f"Invalid file type for {angle}")
+            continue
             
-            # Check if image was kept (has car)
-            final_path = os.path.join(app.config['CAR_IMAGES_FOLDER'], filename)
-            if os.path.exists(final_path):
-                saved_paths.append(os.path.join('car_images', filename))
-            else:
-                rejected_images.append(filename)
-                
-        except Exception as e:
-            # Clean up if something went wrong
-            if os.path.exists(temp_path):
-                os.remove(temp_path)
-            return jsonify({
-                "error": f"Failed to process image {filename}: {str(e)}",
-                "rejected_images": rejected_images,
-                "saved_images": saved_paths
-            }), 500
-
-    new_entry = {
-        "ID": id_value,
-        "Ref": ref_value,
-        "images": saved_paths,
-        "rejected_images": rejected_images
-    }
-    data_store.append(new_entry)
-
-    return jsonify({
-        "message": "Data successfully processed.",
-        "data": new_entry,
-        "stats": {
-            "total_uploaded": len(image_files),
-            "accepted": len(saved_paths),
-            "rejected": len(rejected_images)
+        # Save temporarily for processing
+        filename = secure_filename(f"{request.form['ID']}_{angle}_{file.filename}")
+        temp_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(temp_path)
+        
+        # Validate image quality
+        quality_ok, quality_msg = validate_image_quality(temp_path)
+        if not quality_ok:
+            os.remove(temp_path)
+            validation_passed = False
+            validation_errors.append(f"{angle}: {quality_msg}")
+            continue
+            
+        # Validate car part
+        is_valid_part = detect_car_part(temp_path, angle)
+        if not is_valid_part:
+            os.remove(temp_path)
+            validation_passed = False
+            validation_errors.append(f"Image doesn't show valid {angle.replace('_', ' ')} view")
+            continue
+            
+        # If all checks passed
+        results[angle] = {
+            "filename": filename,
+            "status": "validated",
+            "message": f"Valid {angle.replace('_', ' ')} view"
         }
+    
+    if not validation_passed:
+        return jsonify({
+            "status": "rejected",
+            "errors": validation_errors,
+            "required_angles": REQUIRED_ANGLES
+        }), 400
+    
+    # If all validations passed, save permanently (in a real app, you'd move to permanent storage)
+    return jsonify({
+        "status": "approved",
+        "ID": request.form['ID'],
+        "Ref": request.form['Ref'],
+        "results": results,
+        "message": "All images validated successfully"
     }), 201
-
-@app.route('/api/data', methods=['GET'])
-def get_data():
-    """Retrieve all uploaded data."""
-    return jsonify({
-        "message": "All data retrieved successfully",
-        "data": data_store,
-        "stats": {
-            "total_entries": len(data_store),
-            "total_images": sum(len(entry['images']) for entry in data_store)
-        }
-    })
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
