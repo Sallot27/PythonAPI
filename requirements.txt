@@ -5,3 +5,4 @@ PIL
 io
 sys
 base64
+Image
