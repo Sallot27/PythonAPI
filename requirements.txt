@@ -1,3 +1,7 @@
 Flask
 gunicorn
 ollama
+PIL
+io
+sys
+base64
