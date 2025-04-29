@@ -16,6 +16,11 @@ REQUIRED_ANGLES = ['front', 'rear', 'right_side', 'left_side', 'chassis', 'engin
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
+@app.route('/')
+def index():
+    """Render the index page."""
+    return render_template('index.html', data=data_store)
+
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
