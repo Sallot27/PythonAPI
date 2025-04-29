@@ -2,3 +2,5 @@ Flask
 gunicorn
 ollama
 Image
+Werkzeug
+python-dotenv
