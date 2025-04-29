@@ -65,8 +65,8 @@ def add_data():
         "ID": id_value,
         "Ref": ref_value,
         "images": saved_paths,
-        #"statuses": image_statuses,  # include AI results for rendering
-        #"date": datetime.now().strftime("%Y-%m-%d")
+        "statuses": image_statuses,  # include AI results for rendering
+        "date": datetime.now().strftime("%Y-%m-%d")
                 }
     data_store.append(new_entry)
 
