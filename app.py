@@ -1,54 +1,79 @@
-from flask import Flask, request, jsonify, render_template, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory, render_template
 from werkzeug.utils import secure_filename
 import os
-import tempfile
-import atexit
 
 app = Flask(__name__)
 
-# Temporary in-memory storage (resets on server restart)
-temp_storage = []
-temp_dir = tempfile.mkdtemp()
+# Configuration
+UPLOAD_FOLDER = 'uploads'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
-# Cleanup function
-def cleanup():
-    import shutil
-    shutil.rmtree(temp_dir, ignore_errors=True)
-    print("Cleaned up temporary files")
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+data_store = []
 
-atexit.register(cleanup)
+def allowed_file(filename):
+    """Check if the uploaded file is allowed."""
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route('/')
 def index():
-    # Only show images currently in temp storage
-    return render_template('index.html', images=temp_storage)
+    """Render the index page."""
+    return render_template('index.html', data=data_store)
+
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    """Serve the uploaded files."""
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 @app.route('/api/data', methods=['POST'])
-def upload():
-    if 'file' not in request.files:
-        return jsonify({"error": "No file part"}), 400
-        
-    file = request.files['file']
-    if file.filename == '':
-        return jsonify({"error": "No selected file"}), 400
-        
-    if file:
-        filename = secure_filename(file.filename)
-        temp_path = os.path.join(temp_dir, filename)
-        file.save(temp_path)
-        
-        # Store in temporary list
-        temp_storage.append(filename)
-        
-        return jsonify({
-            "message": "File temporarily uploaded",
-            "filename": filename,
-            "warning": "Files will disappear after refresh"
-        }), 201
+def add_data():
+    """Handle image uploads and data submission."""
+    id_value = request.form.get('ID')
+    ref_value = request.form.get('Ref')
 
-@app.route('/temp/<filename>')
-def serve_temp(filename):
-    return send_from_directory(temp_dir, filename)
+    if not id_value:
+        return jsonify({"error": "ID is required."}), 400
+
+    if not ref_value:
+        return jsonify({"error": "Ref is required."}), 400
+
+    # Get all uploaded files
+    image_files = []
+    for file_key in request.files:
+        file = request.files[file_key]
+        if file and allowed_file(file.filename):
+            image_files.append(file)
+
+    saved_paths = []
+    for img in image_files:
+        try:
+            filename = secure_filename(img.filename)
+            save_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            img.save(save_path)
+            saved_paths.append(filename)
+        except Exception as e:
+            return jsonify({"error": f"Failed to save image: {str(e)}"}), 500
+
+    new_entry = {
+        "ID": id_value,
+        "Ref": ref_value,
+        "images": saved_paths
+    }
+    data_store.append(new_entry)
+
+    return jsonify({
+        "message": "Data successfully saved.",
+        "data": new_entry
+    }), 201
+
+@app.route('/api/data', methods=['GET'])
+def get_data():
+    """Retrieve all uploaded data."""
+    return jsonify({
+        "message": "All data retrieved successfully",
+        "data": data_store
+    })
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
