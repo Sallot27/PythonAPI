@@ -1,5 +1,4 @@
 from flask import Flask, request, jsonify, send_from_directory, render_template_string
-from flask import Flask, request, jsonify, send_from_directory, render_template
 from werkzeug.utils import secure_filename
 import os
  
@@ -35,13 +34,10 @@ import os
      ref_value = request.form.get('Ref')
  
      image_files = [file for file in request.files.values() if allowed_file(file.filename)]
-     if not id_value:
-         return jsonify({"error": "ID is required."}), 400
+    
  
      if not id_value or not ref_value:
-         return jsonify({"error": "ID and Ref are required."}), 400
-     if not ref_value:
-         return jsonify({"error": "Ref is required."}), 400
+         return jsonify({"error": "ID and Ref are required."}), 40
  
      # Get all uploaded files
      image_files = []
@@ -52,11 +48,10 @@ import os
  
      saved_paths = []
      for img in image_files:
- @@ -71,13 +55,25 @@ def add_data():
+ def add_data():
          except Exception as e:
              return jsonify({"error": f"Failed to save image: {str(e)}"}), 500
  
-     new_entry = {"ID": id_value, "Ref": ref_value, "images": saved_paths}
      new_entry = {
          "ID": id_value,
          "Ref": ref_value,
@@ -83,5 +78,4 @@ import os
  
  port = int(os.environ.get("PORT", 5000))
  app.run(host='0.0.0.0', port=port)
- if __name__ == '__main__':
-     app.run(host='0.0.0.0', port=5000, debug=True)
+ 
