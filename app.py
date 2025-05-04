@@ -4,7 +4,7 @@ import os
 from datetime import datetime
 from flask_cors import CORS
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='templates')
 CORS(app)  # Enable CORS for all routes
 
 # Configuration
@@ -119,5 +119,11 @@ def submission_status(submission_id):
         
     return jsonify(data_store[submission_id]), 200
 
+@app.route('/', methods=['GET'])
+def index():
+    """Serve index.html"""
+    return send_from_directory(app.template_folder, 'index.html')
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
+
