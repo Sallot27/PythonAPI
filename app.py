@@ -2,10 +2,9 @@ from flask import Flask, request, jsonify, send_from_directory
 from werkzeug.utils import secure_filename
 import os
 from datetime import datetime
-from flask_cors import CORS
 
 app = Flask(__name__, template_folder='templates')
-CORS(app)  # Enable CORS for all routes
+
 
 # Configuration
 UPLOAD_FOLDER = 'uploads'
@@ -21,6 +20,11 @@ data_store = {}
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    """Serve uploaded images"""
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 @app.route('/api/init_submission', methods=['POST'])
 def init_submission():
@@ -126,4 +130,5 @@ def index():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
+
 
