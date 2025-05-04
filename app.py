@@ -132,7 +132,24 @@ def upload_image(submission_id, image_index):
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+        
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    if 'image' not in request.files:
+        return jsonify({"error": "No image part in the request"}), 400
 
+    file = request.files['image']
+
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
+
+    if file:
+        filename = secure_filename(file.filename)
+        save_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(save_path)
+        return jsonify({"message": "File uploaded successfully", "filename": filename}), 200
+
+    return jsonify({"error": "Invalid file"}), 400
 @app.route('/api/complete_submission/<submission_id>', methods=['POST'])
 def complete_submission(submission_id):
     try:
