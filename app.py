@@ -21,11 +21,6 @@ data_store = {}
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-@app.route('/uploads/<filename>')
-def uploaded_file(filename):
-    """Serve uploaded images"""
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
-
 @app.route('/api/init_submission', methods=['POST'])
 def init_submission():
     """Initialize a new submission with ID and Ref"""
@@ -54,6 +49,60 @@ def init_submission():
             "message": "Submission initialized",
             "submission_id": submission_id
         }), 201
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/data', methods=['POST'])
+def upload_data():
+    """Handle image uploads from Flutter app with multiple images and fields"""
+    try:
+        # Extract ID and Ref from form fields
+        id_value = request.form.get('ID')
+        ref_value = request.form.get('Ref')
+        
+        if not id_value or not ref_value:
+            return jsonify({"error": "Both ID and Ref are required"}), 400
+        
+        # Create or find submission_id
+        submission_id = None
+        for sid, data in data_store.items():
+            if data['ID'] == id_value and data['Ref'] == ref_value and data['status'] == 'in_progress':
+                submission_id = sid
+                break
+        if not submission_id:
+            submission_id = f"{id_value}_{ref_value}_{datetime.now().strftime('%Y%m%d%H%M%S')}"
+            data_store[submission_id] = {
+                "ID": id_value,
+                "Ref": ref_value,
+                "images": [],
+                "status": "in_progress",
+                "created_at": datetime.now().isoformat()
+            }
+        
+        # Process image files named image_0, image_1, etc.
+        image_files = []
+        for key in request.files:
+            if key.startswith('image_'):
+                image_files.append((int(key.split('_')[1]), request.files[key]))
+        
+        # Sort by index
+        image_files.sort(key=lambda x: x[0])
+        
+        for index, file in image_files:
+            if file and allowed_file(file.filename):
+                filename = f"{submission_id}_image{index}_{secure_filename(file.filename)}"
+                save_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                file.save(save_path)
+                
+                if len(data_store[submission_id]["images"]) <= index:
+                    data_store[submission_id]["images"].append(filename)
+                else:
+                    data_store[submission_id]["images"][index] = filename
+            else:
+                return jsonify({"error": f"File type not allowed for image {index}"}), 400
+        
+        return jsonify({"message": "Images uploaded successfully", "submission_id": submission_id}), 200
         
     except Exception as e:
         return jsonify({"error": str(e)}), 500
