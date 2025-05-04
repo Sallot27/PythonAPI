@@ -4,3 +4,4 @@ ollama
 Image
 Werkzeug
 python-dotenv
+flask_cors
