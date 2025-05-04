@@ -13,40 +13,6 @@ import os
  os.makedirs(UPLOAD_FOLDER, exist_ok=True)
  data_store = []
  
- HTML_PAGE = """
- <!doctype html>
- <html lang="en">
-   <head>
-     <meta charset="utf-8">
-     <title>Image Upload and Gallery</title>
-     <style>
-       body { font-family: Arial, sans-serif; padding: 20px; }
-       .gallery img { max-width: 200px; margin: 10px; border: 1px solid #ccc; border-radius: 10px; }
-     </style>
-   </head>
-   <body>
-     <h1>Upload Image</h1>
-     <form method="POST" action="/api/data" enctype="multipart/form-data">
-       ID: <input type="text" name="ID" required><br>
-       Ref: <input type="text" name="Ref" required><br>
-       Image: <input type="file" name="image" accept="image/*" multiple required><br><br>
-       <input type="submit" value="Upload">
-     </form>
-     <h2>Uploaded Images</h2>
-     <div class="gallery">
-       {% for entry in data %}
-         {% for img in entry.images %}
-           <div>
-             <p><strong>{{ entry.ID }}</strong> - {{ entry.Ref }}</p>
-             <img src="/uploads/{{ img }}" alt="{{ img }}">
-           </div>
-         {% endfor %}
-       {% endfor %}
-     </div>
-   </body>
- </html>
- """
- 
  def allowed_file(filename):
      """Check if the uploaded file is allowed."""
      return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
