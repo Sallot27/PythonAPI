@@ -1,7 +1,7 @@
-rom flask import Flask, request, jsonify, send_from_directory, render_template_string
- from flask import Flask, request, jsonify, send_from_directory, render_template
- from werkzeug.utils import secure_filename
- import os
+from flask import Flask, request, jsonify, send_from_directory, render_template_string
+from flask import Flask, request, jsonify, send_from_directory, render_template
+from werkzeug.utils import secure_filename
+import os
  
  app = Flask(__name__)
  
