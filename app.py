@@ -1,13 +1,15 @@
-from flask import Flask, render_template, request, jsonify,send_from_directory
+from flask import Flask, render_template, request, jsonify, send_from_directory
 from werkzeug.utils import secure_filename
 import os
 
 app = Flask(__name__)
-
+Upload_Folder = 'uploads'
+Allowed_Extentions = {'png', 'jpg', 'jpeg'}
 UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-Allowed_Extentions = {'png', 'jpg', 'jpeg'}
+
 app.config['Upload_Folder'] = Upload_Folder
+os.makedirs(Upload_Folder, exist_ok=True)
 data_store = []
 
 @app.route('/')
@@ -53,7 +55,6 @@ def get_data():
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
     return send_from_directory(UPLOAD_FOLDER, filename)
-
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, debug=True)
