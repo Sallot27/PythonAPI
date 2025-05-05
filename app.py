@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 from flask import Flask , request , jsonify
 from werkzeug.utils import secure_filename
 import os
@@ -141,4 +141,3 @@ import os
  port = int(os.environ.get("PORT", 5000))
  app.run(host='0.0.0.0', port=port)
  
->>>>>>> f68458da565b5379ddb9a778fd2e5be97362b4e3
