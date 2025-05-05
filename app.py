@@ -16,12 +16,6 @@ data_store = []
 def index():
     return render_template('index.html')
 
-
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.')[1].lower() in Allowed_Extentions
-
-
 @app.route('/api/data', methods=['POST'])
 def add_data():
     if 'image' not in request.files:
@@ -54,12 +48,15 @@ def add_data():
         "data": new_entry
     }), 201
 
-@app.route('/api/images', methods=['GET'])
-def list_images():
-    images = []
-    for entry in data_store:
-        images.extend(entry.get("images", []))
-    return jsonify({"images": images})
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in Allowed_Extentions
+
+@app.route("/api/images", methods=["GET"])
+def get_images():
+    files = os.listdir(app.config['Upload_Folder'])
+    image_files = [f for f in files if allowed_file(f)]
+    return jsonify({"images": image_files})
 
 
 if __name__ == "__main__":
