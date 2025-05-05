@@ -4,6 +4,8 @@ import os
 
 app = Flask(__name__)
 
+UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads')
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 Allowed_Extentions = {'png', 'jpg', 'jpeg'}
 app.config['Upload_Folder'] = Upload_Folder
 data_store = []
@@ -47,9 +49,6 @@ def get_data():
         "message": "ALL Data Retrived Successfully",
         "data": data_store
     })
-
-UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads')
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
