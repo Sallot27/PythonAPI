@@ -2,16 +2,6 @@ from flask import Flask, render_template, request, jsonify, send_from_directory
 from werkzeug.utils import secure_filename
 import os
 
-app = Flask(__name__)
-Upload_Folder = 'uploads'
-Allowed_Extentions = {'png', 'jpg', 'jpeg'}
-UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads')
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
-app.config['Upload_Folder'] = Upload_Folder
-os.makedirs(Upload_Folder, exist_ok=True)
-data_store = []
-
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -28,29 +18,31 @@ def add_data():
         return jsonify({'error': 'No image file provided'}), 400
 
     uploaded_file = request.files['image']
+    id_value = request.form.get('ID')
 
-    # Example usage:
-    filename = uploaded_file.filename
-    uploaded_file.save(f'uploads/{filename}')  # Save file to disk or process as needed
+    if not id_value:
+        return jsonify({'error': 'ID is required'}), 400
 
-    return jsonify({'message': 'File uploaded successfully'}), 200
+    if uploaded_file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
+
+    if not allowed_file(uploaded_file.filename):
+        return jsonify({'error': 'File type not allowed'}), 400
+
+    filename = secure_filename(uploaded_file.filename)
+    save_path = os.path.join(UPLOAD_FOLDER, filename)
+    uploaded_file.save(save_path)
 
     new_entry = {
         "ID": id_value,
-        "images": saved_paths
+        "images": [filename]
     }
     data_store.append(new_entry)
 
     return jsonify({
         "message": "Data Successfully saved.",
-        "data": new_entry}), 201
-
-@app.route("/api/data", methods=['GET'])
-def get_data():
-    return jsonify({
-        "message": "ALL Data Retrived Successfully",
-        "data": data_store
-    })
+        "data": new_entry
+    }), 201
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
