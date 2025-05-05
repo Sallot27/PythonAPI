@@ -2,6 +2,16 @@ from flask import Flask, render_template, request, jsonify, send_from_directory
 from werkzeug.utils import secure_filename
 import os
 
+app = Flask(__name__)
+Upload_Folder = 'uploads'
+Allowed_Extentions = {'png', 'jpg', 'jpeg'}
+UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads')
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+app.config['Upload_Folder'] = Upload_Folder
+os.makedirs(Upload_Folder, exist_ok=True)
+data_store = []
+
 @app.route('/')
 def index():
     return render_template('index.html')
