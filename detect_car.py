@@ -46,12 +46,15 @@ def process_image(image_path, output_dir="cars"):
             with Image.open(image_path) as img:
                 img.save(output_path)
             print(f"✅ Car detected. Image saved to: {output_path}")
+            return True
         else:
             # Delete the image if no car is detected
             os.remove(image_path)
             print("❌ No car detected. Image disposed.")
+            return False
     except Exception as e:
         print(f"⚠️ Error processing image: {e}")
+        return False
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
