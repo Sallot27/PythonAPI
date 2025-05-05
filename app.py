@@ -54,9 +54,13 @@ def add_data():
         "data": new_entry
     }), 201
 
-@app.route('/uploads/<filename>')
-def uploaded_file(filename):
-    return send_from_directory(UPLOAD_FOLDER, filename)
+@app.route('/api/images', methods=['GET'])
+def list_images():
+    images = []
+    for entry in data_store:
+        images.extend(entry.get("images", []))
+    return jsonify({"images": images})
+
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, debug=True)

@@ -80,6 +80,24 @@
 
   <script>
     // Client-side filtering remains the same
+    window.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const res = await fetch('/api/images');
+    const { images } = await res.json();
+    const gallery = document.getElementById('gallery');
+    gallery.innerHTML = '';
+
+    images.forEach(filename => {
+      const img = document.createElement('img');
+      img.src = `/uploads/${filename}`;
+      img.alt = filename;
+      img.className = 'w-full h-auto rounded shadow';
+      gallery.appendChild(img);
+    });
+  } catch (error) {
+    console.error('Failed to load gallery images:', error);
+  }
+});
 
     // Modified form submission handler for API compatibility and multiple image upload
     uploadForm.addEventListener('submit', async (e) => {
