@@ -19,7 +19,8 @@
     window.addEventListener('DOMContentLoaded', async () => {
       try {
         const res = await fetch('/api/images');
-        const data = await res.json();
+        const { images } = await res.json();
+
 
         const gallery = document.getElementById('gallery');
         gallery.innerHTML = '';
