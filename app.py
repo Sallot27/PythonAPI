@@ -1,45 +1,39 @@
-
-from flask import Flask , request , jsonify
+from flask import Flask, render_template, request, jsonify
 from werkzeug.utils import secure_filename
 import os
 
 app = Flask(__name__)
 Upload_Folder = 'uploads'
-Allowed_Extentions = {'png' ,'jpg','jpeg' }
+Allowed_Extentions = {'png', 'jpg', 'jpeg'}
 
 app.config['Upload_Folder'] = Upload_Folder
-os.makedirs(Upload_Folder , exist_ok=True)
-data_store=[]
+os.makedirs(Upload_Folder, exist_ok=True)
+data_store = []
+
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 
 def allowed_file(filename):
-        return '.' in filename and \
-                filename.rsplit('.')[1].lower() in Allowed_Extentions
+    return '.' in filename and \
+           filename.rsplit('.')[1].lower() in Allowed_Extentions
 
 
-@app.route('/api/data', methods= ['POST'])
+@app.route('/api/data', methods=['POST'])
 def add_data():
-    id_value= request.form.get('ID')
+    if 'image' not in request.files:
+        return jsonify({'error': 'No image file provided'}), 400
 
-    image.files=[]
-    for file_key in request.files:
-        file = request.files[file_key]
-        if file and allowed_file(file.filename):
-            image_files.append(file)
-    if not id_value:
-        return jsonify({"error": "ID is required."}), 400
+    uploaded_file = request.files['image']
 
-    saved_paths= [] 
-    for img in image_files:
-        try:
-            filename = secure_filename(img.filename)
-            saved_path = os.path.join(app.config['Upload_Folder'], filename)
-            img.save(saved_path)
-            saved_paths.append(filename)
-        except Exception as e:
-            return jsonify({"error": f"fialed to save image :  {str(e)}"}), 500
+    # Example usage:
+    filename = uploaded_file.filename
+    uploaded_file.save(f'uploads/{filename}')  # Save file to disk or process as needed
 
-    new_entry= {
+    return jsonify({'message': 'File uploaded successfully'}), 200
+
+    new_entry = {
         "ID": id_value,
         "images": saved_paths
     }
@@ -47,15 +41,16 @@ def add_data():
 
     return jsonify({
         "message": "Data Successfully saved.",
-        "data" : new_entry}), 201
+        "data": new_entry}), 201
 
-@app.route("/api/data" , methods=['GET'])
+@app.route("/api/data", methods=['GET'])
 def get_data():
     return jsonify({
         "message": "ALL Data Retrived Successfully",
-        "data" : data_store
+        "data": data_store
     })
 
 
 if __name__ == "__main__":
-    app.run(host = '0.0.0.0' , port= 5000 , debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
+
