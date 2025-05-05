@@ -1,46 +1,49 @@
 import os
-from flask import Flask, request, jsonify, send_from_directory
+import uuid
+import tempfile
+from flask import Flask, request, jsonify, send_from_directory, render_template
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-
-UPLOAD_FOLDER = '/tmp/uploads'
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
-
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+UPLOAD_FOLDER = tempfile.gettempdir()
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+# Serve the frontend
 @app.route('/')
 def index():
     return render_template('index.html')
 
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+# Serve uploaded images
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
+# Image upload endpoint
 @app.route('/api/data', methods=['POST'])
-def add_data():
-    if 'image' not in request.files:
-        return jsonify({'error': 'No image provided'}), 400
+def upload_image():
+    if 'image_' not in request.files:
+        return jsonify({'error': 'No image uploaded'}), 400
 
-    file = request.files['image']
+    image = request.files['image_']
+    if image.filename == '':
+        return jsonify({'error': 'Empty filename'}), 400
 
-    if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
-        path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        file.save(path)
-        return jsonify({'message': 'Uploaded', 'filename': filename}), 200
+    filename = secure_filename(f"{uuid.uuid4().hex}_{image.filename}")
+    path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    image.save(path)
 
-    return jsonify({'error': 'Invalid file type'}), 400
+    return jsonify({'filename': filename, 'url': f'/uploads/{filename}'})
 
-@app.route('/api/images')
-def list_images():
-    files = os.listdir(app.config['UPLOAD_FOLDER'])
-    images = [f for f in files if allowed_file(f)]
-    return jsonify({'images': images})
 
 @app.route('/uploads/<filename>')
 def serve_image(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
-if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000)
+
+@app.route('/api/images')
+def list_images():
+    files = [f for f in os.listdir(app.config['UPLOAD_FOLDER']) if f.lower().endswith(('png', 'jpg', 'jpeg', 'gif'))]
+    return jsonify({'images': files})
+
+if __name__ == '__main__':
+    app.run(debug=True)

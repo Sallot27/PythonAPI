@@ -16,28 +16,21 @@
   </main>
 
   <script>
-    window.addEventListener('DOMContentLoaded', async () => {
-      try {
-        const res = await fetch('/api/images');
-        const { images } = await res.json();
-
-
-        const gallery = document.getElementById('gallery');
-        gallery.innerHTML = '';
-
-        if (Array.isArray(data.images)) {
-          data.images.forEach(filename => {
-            const img = document.createElement('img');
-            img.src = `/uploads/${filename}`;
-            img.alt = filename;
-            img.className = 'w-full h-auto rounded shadow';
-            gallery.appendChild(img);
-          });
-        }
-      } catch (err) {
-        console.error('Error loading images:', err);
-      }
+   
+  // Replace this array with dynamic fetch if needed
+  const gallery = document.getElementById('gallery');
+  fetch('/api/images')
+    .then(res => res.json())
+    .then(data => {
+      gallery.innerHTML = '';
+      (data.images || []).forEach(filename => {
+        const img = document.createElement('img');
+        img.src = `/uploads/${filename}`;
+        img.className = 'w-full h-auto rounded shadow';
+        gallery.appendChild(img);
+      });
     });
-  </script>
+</script>
+
 </body>
 </html>
