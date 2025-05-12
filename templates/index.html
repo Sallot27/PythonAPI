@@ -12,7 +12,7 @@
 
     <div id="gallery" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
       <template v-for="image in images">
-        <img class="rounded" :src="/api/images" :alt="image" />
+        <img class="rounded" :src="/api/data" :alt="image" />
         <img class="rounded" :src="`/uploads/${filename}`" :alt="image" />
       </template>
       
@@ -21,7 +21,6 @@
 
   <script>
    
-  // Replace this array with dynamic fetch if needed
   const gallery = document.getElementById('gallery');
   fetch('/api/images')
     .then(res => res.json())
