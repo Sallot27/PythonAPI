@@ -13,18 +13,18 @@ app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 
 # 🧪 In-memory test applications and uploads
 test_applications = {
-    "1234567890": "ABCD1234EF",  #1 id: reference
-    "1122334455": "ABCDEFG123" , #2 id: reference 
-    "2111111111": "SALLOT1234" , #3 id: reference
-    "2211111111": "SALLOT1234" , #3 id: reference
-    "2311111111": "SALLOT1234" , #3 id: reference
-    "2411111111": "SALLOT1234" , #3 id: reference
-    "2511111111": "SALLOT1234" , #3 id: reference
-    "2611111111": "SALLOT1234" , #3 id: reference
-    "2711111111": "SALLOT1234" , #3 id: reference
-    "2811111111": "SALLOT1234" , #3 id: reference
-    "2911111111": "SALLOT1234" , #3 id: reference
-    "1011111111": "SALLOT1234" , #3 id: reference
+    "1334567890": "ABCD1234EF",  #1 id: reference
+    "1322334455": "ABCDEFG123" , #2 id: reference 
+    "2333111111": "SALLOT1234" , #3 id: reference
+    "3333111111": "SALLOT1234" , #3 id: reference
+    "3334111111": "SALLOT1234" , #3 id: reference
+    "5555111111": "SALLOT1234" , #3 id: reference
+    "6666111111": "SALLOT1234" , #3 id: reference
+    "7777111111": "SALLOT1234" , #3 id: reference
+    "8888111111": "SALLOT1234" , #3 id: reference
+    "9999111111": "SALLOT1234" , #3 id: reference
+    "1777111111": "SALLOT1234" , #3 id: reference
+    "2777111111": "SALLOT1234" , #3 id: reference
 
 }
 
