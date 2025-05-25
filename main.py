@@ -20,6 +20,12 @@ test_applications = {
     "2311111111": "SALLOT1234" , #3 id: reference
     "2411111111": "SALLOT1234" , #3 id: reference
     "2511111111": "SALLOT1234" , #3 id: reference
+    "2611111111": "SALLOT1234" , #3 id: reference
+    "2711111111": "SALLOT1234" , #3 id: reference
+    "2811111111": "SALLOT1234" , #3 id: reference
+    "2911111111": "SALLOT1234" , #3 id: reference
+    "1011111111": "SALLOT1234" , #3 id: reference
+
 }
 
 # Track uploads: { "id": [list of car sides uploaded] }
