@@ -15,7 +15,11 @@ app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 test_applications = {
     "1234567890": "ABCD1234EF",  #1 id: reference
     "1122334455": "ABCDEFG123" , #2 id: reference 
-    "1472583690": "SALLOT1234" , #3 id: reference
+    "2111111111": "SALLOT1234" , #3 id: reference
+    "2211111111": "SALLOT1234" , #3 id: reference
+    "2311111111": "SALLOT1234" , #3 id: reference
+    "2411111111": "SALLOT1234" , #3 id: reference
+    "2511111111": "SALLOT1234" , #3 id: reference
 }
 
 # Track uploads: { "id": [list of car sides uploaded] }
