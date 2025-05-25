@@ -13,19 +13,7 @@ app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 
 # 🧪 In-memory test applications and uploads
 test_applications = {
-    "1334567890": "ABCD1234EF",  #1 id: reference
-    "1322334455": "ABCDEFG123" , #2 id: reference 
-    "2333111111": "SALLOT1234" , #3 id: reference
-    "3333111111": "SALLOT1234" , #3 id: reference
-    "3334111111": "SALLOT1234" , #3 id: reference
-    "5555111111": "SALLOT1234" , #3 id: reference
-    "6666111111": "SALLOT1234" , #3 id: reference
-    "7777111111": "SALLOT1234" , #3 id: reference
-    "8888111111": "SALLOT1234" , #3 id: reference
-    "9999111111": "SALLOT1234" , #3 id: reference
-    "1777111111": "SALLOT1234" , #3 id: reference
-    "2777111111": "SALLOT1234" , #3 id: reference
-
+   "1234554321": "qawsedrftg" 
 }
 
 # Track uploads: { "id": [list of car sides uploaded] }
