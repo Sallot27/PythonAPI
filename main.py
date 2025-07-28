@@ -110,7 +110,134 @@ def summary():
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
-# TEMPLATE_UPLOAD and TEMPLATE_SUMMARY follow as before or can be improved further with JS loading, progress, etc.
+TEMPLATE_UPLOAD = '''
+<!doctype html>
+<html lang="en">
+<head>
+  <title>Car Image Upload</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background: #eef3fc; }
+    .container { max-width: 960px; margin-top: 40px; }
+    .upload-box { border: 1px dashed #999; padding: 16px; border-radius: 10px; background: #fff; }
+    .img-preview { width: 100%; max-height: 180px; object-fit: cover; margin-top: 8px; border-radius: 6px; }
+
+    /* Loading overlay */
+    #loading-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(255,255,255,0.8);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2 class="text-center mb-4">Upload All Required Car Photos</h2>
+    <form method="post" enctype="multipart/form-data" onsubmit="showLoading()">
+      <div class="row g-3">
+        {% for part, label in parts %}
+        <div class="col-md-4">
+          <label class="form-label">{{ label }}</label>
+          <div class="upload-box">
+            <input type="file" class="form-control" name="{{ part }}" accept="image/*" onchange="previewImage(this, '{{ part }}')">
+            <img id="preview-{{ part }}" class="img-preview" style="display:none;">
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="text-center mt-4">
+        <button class="btn btn-primary px-4" type="submit">Submit All</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div id="loading-overlay">
+    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+    <div class="mt-3 fs-5 text-primary">Processing images, please wait...</div>
+  </div>
+
+  <script>
+  function previewImage(input, id) {
+    const preview = document.getElementById('preview-' + id);
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+      }
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+
+  function showLoading() {
+    sessionStorage.setItem('startTime', Date.now());
+    document.getElementById('loading-overlay').style.display = 'flex';
+  }
+</script>
+
+</body>
+</html>
+'''
+
+TEMPLATE_SUMMARY = '''
+<!doctype html>
+<html lang="en">
+<head>
+  <title>Upload Summary</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background: #f8fafc; }
+    .container { max-width: 960px; margin-top: 40px; }
+    .img-preview { width: 100%; max-height: 200px; object-fit: cover; border-radius: 6px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2 class="text-center mb-4">Upload Summary</h2>
+    <div class="row g-4">
+      {% for r in results %}
+      <div class="col-md-4 text-center">
+        <h6>{{ r.label }}</h6>
+        {% if r.filename %}
+          <img src="{{ url_for('uploaded_file', filename=r.filename) }}" class="img-preview mb-2" alt="{{ r.label }}">
+        {% else %}
+          <div class="text-danger mb-2">No image uploaded</div>
+        {% endif %}
+        {% if r.answer == 'yes' %}
+          <span class="badge bg-success">✔ Valid</span>
+        {% elif r.answer == 'no' %}
+          <span class="badge bg-danger">✖ Invalid</span>
+        {% else %}
+          <span class="badge bg-secondary">Error</span>
+        {% endif %}
+        {% if r.reason %}
+          <div class="text-warning mt-1"><small>{{ r.reason }}</small></div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    <hr>
+    <div class="text-center mt-4">
+      {% if all_yes %}
+        <div class="alert alert-success">✅ All images are valid for insurance purposes.</div>
+      {% else %}
+        <div class="alert alert-danger">⚠ Some images did not meet the requirements.</div>
+      {% endif %}
+      <a class="btn btn-outline-primary" href="{{ url_for('upload_all') }}">Try Again</a>
+    </div>
+  </div>
+</body>
+</html>
+'''
 
 if __name__ == '__main__':
     app.run(debug=True)
